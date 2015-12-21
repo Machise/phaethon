@@ -1,8 +1,8 @@
-##################### Phaethon Bathtub Curve Generator ######################
+################## Phaethon Stationary to Failure Generator ####################
 # Author : Richard Podkolinski
 # Email  : devlar@gmail.com
 # Purpose: Produces a stationary data set with inflated variance at the tail
-#############################################################################
+################################################################################
 
 stationary_to_failure = function( 
   # Lifetime integer
