@@ -40,6 +40,7 @@ generate_lifetimes = function(
   
   
   # Imports
+  require(dplyr)
   source("stationary_to_failure.R", local = TRUE)
   source("rweibullmixcensored.R",   local = TRUE)
   
