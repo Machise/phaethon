@@ -34,6 +34,7 @@ ui = fluidPage(
                  ),#/tabPanel
         tabPanel(
           "Tab 2",
+          tableOutput("lifetime_descriptives"),
           plotOutput("energy_ts")
                  )#/tabPanel
       )#/tabsetPanel
@@ -50,10 +51,21 @@ server = function(input, output, session) {
     return(output)
   })
   
+  
+  ## Plots ##
+  
   output$energy_ts = renderPlot({
     if(is.null(individual_select())) return()
-    individual_select() %>% ggplot(aes(x=epoch, y=energy)) + geom_line()
+    individual_select() %>% 
+      ggplot(aes(x=epoch, y=energy)) +
+      geom_line() + geom_vline(xintercept = last(individual_select()$censor_time))
   })
+  
+  ## Tables ##
+  output$lifetime_descriptives = renderTable({
+    individual_select() %>% slice(max(.$epoch))
+  })
+  
   
 }
 
