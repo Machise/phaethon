@@ -40,15 +40,16 @@ rweibullmixcensored = function(
                           oldage_scale = oldage_scale,
                           ceiling = ceiling)
   
-  # Determine which values should be censored
-  censored = rbinom( length(lifetimes), 1, cen_prob)
+  # Determine which values should be the event
+  event = rbinom( length(lifetimes), 1, cen_prob)
+  event = as.integer(!event)
   
   # Output for loop, with censor time
   censored_time = numeric()
   
   for(i in 1:length(lifetimes)){
     
-    if(censored[i] == 1){
+    if(event[i] == 0){
       
       # Censor observation
       ## Generate a random number between 1 and t for the lifetime
@@ -68,10 +69,13 @@ rweibullmixcensored = function(
     
   }
   
+  
+  
+  
   # Construct dataframe output from vectors
   output = data.frame(id = 1:n, 
                       lifetime = lifetimes, 
-                      censored = censored, 
+                      event = event, 
                       censor_time = censored_time)
   
   return(output)
