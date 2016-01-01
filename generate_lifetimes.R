@@ -69,7 +69,8 @@ generate_lifetimes = function(
       left_join(
         data.frame(id      = .$id[1],
                    epoch   = seq(1, max(.$lifetime), 1),
-                   energy  = stationary_to_failure( max(.$lifetime) )
+                   energy  = stationary_to_failure( max(.$lifetime) )[1],
+                   alarm   = stationary_to_failure( max(.$lifetime) )[2]
         ), #/data.frame
         ., by=c("id")) #/join
     ) #/do
