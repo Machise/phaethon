@@ -25,7 +25,7 @@ stationary_to_failure = function(
       energy = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
                  rnorm(    f_window,   mean = mu_2, sd = sd_2))
       
-      alarm  = c( rep( 0, n-f_window ), rep(1, f_window) )
+      alarm  = c( rep( 0, n-f_window ), 1:f_window )
       
       output = list(energy = energy, alarm = alarm)
       
@@ -38,7 +38,7 @@ stationary_to_failure = function(
       energy = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
                  rnorm(    f_window,   mean = mu_2, sd = sd_2))
       
-      alarm  = c( rep( 0, n-f_window ), rep(1, f_window) )
+      alarm  = c( rep( 0, n-f_window ), 1:f_window )
       
       output = list(energy = energy, alarm = alarm)
       

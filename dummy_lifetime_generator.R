@@ -10,11 +10,11 @@ source("generate_lifetimes.R")
 
 df = generate_lifetimes(  
   # Number of lifetimes to generate
-  4000, 
+  1000, 
   # Probability of censorship
   cen_prob = 0.4,
   # Probability of infant mortality
-  inf_prob = 0.1,
+  inf_prob = 0.25,
   # Precision of lifetimes, default is days
   precision = 1,
   # Infant shape parameter
