@@ -22,16 +22,26 @@ stationary_to_failure = function(
       f_window = ceiling(runif(1, min_days, max_days))
       
       # Glue together normal operating values with abnormal on the end
-      output = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
+      energy = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
                  rnorm(    f_window,   mean = mu_2, sd = sd_2))
+      
+      alarm  = c( rep( 0, n-f_window ), rep(1, f_window) )
+      
+      output = list(energy = energy, alarm = alarm)
       
       return(output)
     } else {
       # Return random mix of normal and abnormal series
       
       f_window = ceiling(runif(1, 1, n))
-      output = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
+      
+      energy = c(rnorm( (n-f_window) , mean = mu_1, sd = sd_1),
                  rnorm(    f_window,   mean = mu_2, sd = sd_2))
+      
+      alarm  = c( rep( 0, n-f_window ), rep(1, f_window) )
+      
+      output = list(energy = energy, alarm = alarm)
+      
       return(output)
     } #/else
   
