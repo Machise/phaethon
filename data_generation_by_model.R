@@ -60,20 +60,3 @@ plot(1:60, dsim$er_npool, xlab = "Pond", ylab = "Absolute Error", col = rangi2, 
 points(1:60, dsim$er_ppool)
 
 
-
-#### Now with Weibull Model ####
-
-
-n = 1000
-df = data.frame(
-  inv = 1:n,
-  lft = rweibull(n, 1.5, 365)
-)
-  
-
-dens(df$lft)
-
-dens(log(df$lft))
-
-
-m14 = map2
