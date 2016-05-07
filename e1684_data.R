@@ -1,3 +1,5 @@
+
+## JAGS Format for Data
 lfe = list(t = c(1.57808,
                  1.48219,
                  NA,
@@ -763,3 +765,28 @@ lfe = list(t = c(1.57808,
                    0,
                    1,
                    1), N = 255)
+
+lfe$isCensored = ifelse(is.na(lfe$t), 1, 0)
+
+# For Surv Package
+dfe = data.frame(obs_t = ifelse(is.na(lfe$t), lfe$t.cen, lfe$t), 
+                 event = ifelse(is.na(lfe$t), 0, 1), 
+                 trt = lfe$trt)
+
+# For STAN Package
+
+# Data needs to be reprocessed to separate censored data from non-censored data
+censored = is.na(lfe$t)
+
+lfs = list(
+  N_uncensored = sum(!censored),
+  N_censored   = sum(censored),
+  N = sum(!censored) + sum(censored),
+  t_uncensored = lfe$t[!censored],
+  t_censored   = lfe$t.cen[censored],
+  trt_uncensored = lfe$trt[!censored],
+  trt_censored = lfe$trt[censored]
+)
+
+rm(censored)
+

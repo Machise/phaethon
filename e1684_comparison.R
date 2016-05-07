@@ -1,6 +1,8 @@
 library(survival)
 library(runjags)
 library(coda)
+library(rstan)
+library(rethinking)
 source("e1684_data.R")
 
 lfe$t
@@ -12,23 +14,24 @@ obs_t = ifelse(is.na(lfe$t), lfe$t.cen, lfe$t)
 Surv(obs_t, event)
 
 dfe = data.frame(obs_t, event, trt = lfe$trt)
-
-m5 = map2stan(
-  alist(
-    beta0 ~ dnorm(0, 1e5),
-    beta1 ~ dnorm(0, 1e5),
-    
-    obs_t ~ dexp(lambda),
-    lambda <- exp(beta0 + beta1 * trt)
-  ), data = dfe, start = list(beta0 = 0, beta1 = 0)
-)
-stancode(m5)
+# 
+# m5 = map2stan(
+#   alist(
+#     beta0 ~ dnorm(0, 1e5),
+#     beta1 ~ dnorm(0, 1e5),
+#     
+#     obs_t ~ dexp(lambda),
+#     lambda <- exp(beta0 + beta1 * trt)
+#   ), data = dfe, start = list(beta0 = 0, beta1 = 0)
+# )
+# precis(m5)
+# stancode(m5)
 
 
 m1 = survreg(Surv(obs_t, event) ~ trt, data = lfe, dist = "exponential")
 summary(m1)
 
-lfe$isCensored = event = ifelse(is.na(lfe$t), 1, 0)
+lfe$isCensored = ifelse(is.na(lfe$t), 1, 0)
 
 cat("
     model
@@ -49,44 +52,28 @@ cat("
 m2 = run.jags(data = lfe,
               model = "survival_cancer.jags",
               monitor = c("beta0", "beta1"),
-              sample = 1e4, burnin = 1e3, n.chains = 3)
-print(m2)
+              sample = 1e5, burnin = 1e3, n.chains = 3)
+print(m2)[,"Mean"]
 
 
-library(rstan)
 
-# Data needs to be reprocessed to separate 
+# Data needs to be reprocessed to separate censored data from non-censored data
 censored = is.na(lfe$t)
 
-N_uncensored = sum(!censored)
-N_censored   = sum(censored)
-
-t_uncensored = lfe$t[!censored]
-t_censored   = lfe$t.cen[censored]
-
-trt_uncensored = lfe$trt[!censored] + 1
-trt_censored = lfe$trt[censored] + 1
-
-
-# lfs = list(N_uncensored, N_censored, t_uncensored, t_censored, trt_uncensored, trt_censored, M=2)
-lfs = list(N_uncensored = N_uncensored, 
-           N_censored = N_censored, 
-           t_uncensored = t_uncensored,
-           censor_time = t_censored, 
-           group_uncensored = trt_uncensored, 
-           group_censored = trt_censored,
-           M = 2)
+lfs = list(
+    N_uncensored = sum(!censored),
+     N_censored   = sum(censored),
+     N = sum(!censored) + sum(censored),
+     t_uncensored = lfe$t[!censored],
+     t_censored   = lfe$t.cen[censored],
+     trt_uncensored = lfe$trt[!censored],
+     trt_censored = lfe$trt[censored]
+)
 
 
-lfs = list(N_uncensored = N_uncensored, 
-           N_censored = N_censored, 
-           t_uncensored = t_uncensored,
-           t_censored = t_censored, 
-           trt_uncensored = trt_uncensored, 
-           trt_censored = trt_censored,
-           M = 2)
 
-m3 = stan(file = "e1684_STAN.stan", data=lfs, iter = 1e4, warmup = 1e3)
-precis(m3)
+
+
+m3 = stan(file = "e1684_STAN.stan", data=lfs, iter = 1e4, warmup = 1e3); precis(m3)
 pairs(m3)
 #m3 = stan(file = "mice.stan", data=lfs)
