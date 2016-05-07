@@ -1,4 +1,4 @@
-# cancer <- read.table("http://goo.gl/3cnoam", header=TRUE)
+cancer <- read.table("http://goo.gl/3cnoam", header=TRUE)
 summary(cancer)
 
 censored = cancer$status == 0
@@ -12,6 +12,16 @@ t_cen = rep(0, times = length(censored))
 t_cen[censored] = cancer$death[censored]
 t_cen
 
+
+dfc = data.frame(t_to_death = t_to_death,
+           t_cen = t_cen,
+           N = nrow(cancer),
+           group = rep(1:4, each = 30))
+
+library(survival)
+m1 = survreg(Surv(cancer$death, cancer$status) ~ 1, dist = "exponential")
+summary(m1)
+exp(m1$coefficients)
 
 # Put data together for JAGS
 cancer_data = list(t_to_death = t_to_death,

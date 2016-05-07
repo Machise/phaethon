@@ -1,7 +1,7 @@
 #file://retnlso-nt0002/RIPOD1$/Desktop/survival_analysis.html
 #http://www.petrkeil.com/?p=2425
 seedlings <- read.table("http://goo.gl/chMvEo", header=TRUE)
-sd = read_csv("seedlings.csv")
+sd = read.csv("seedlings.csv")
 
 sd$status = 1*(sd$death > 0)
 
