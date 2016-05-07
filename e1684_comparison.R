@@ -13,6 +13,18 @@ Surv(obs_t, event)
 
 dfe = data.frame(obs_t, event, trt = lfe$trt)
 
+m5 = map2stan(
+  alist(
+    beta0 ~ dnorm(0, 1e5),
+    beta1 ~ dnorm(0, 1e5),
+    
+    obs_t ~ dexp(lambda),
+    lambda <- exp(beta0 + beta1 * trt)
+  ), data = dfe, start = list(beta0 = 0, beta1 = 0)
+)
+stancode(m5)
+
+
 m1 = survreg(Surv(obs_t, event) ~ trt, data = lfe, dist = "exponential")
 summary(m1)
 
@@ -74,5 +86,7 @@ lfs = list(N_uncensored = N_uncensored,
            trt_censored = trt_censored,
            M = 2)
 
-m3 = stan(file = "e1684_STAN.stan", data=lfs)
-m3 = stan(file = "mice.stan", data=lfs)
+m3 = stan(file = "e1684_STAN.stan", data=lfs, iter = 1e4, warmup = 1e3)
+precis(m3)
+pairs(m3)
+#m3 = stan(file = "mice.stan", data=lfs)
