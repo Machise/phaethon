@@ -767,6 +767,7 @@ lfe = list(t = c(1.57808,
                    1), N = 255)
 
 lfe$isCensored = ifelse(is.na(lfe$t), 1, 0)
+lfe$new_t = 0:25
 
 # For Surv Package
 dfe = data.frame(obs_t = ifelse(is.na(lfe$t), lfe$t.cen, lfe$t), 
@@ -787,6 +788,8 @@ lfs = list(
   trt_uncensored = lfe$trt[!censored],
   trt_censored = lfe$trt[censored]
 )
+
+lfs$L = min(lfs$t_uncensored)
 
 rm(censored)
 

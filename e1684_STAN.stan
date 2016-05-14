@@ -16,7 +16,8 @@ model{
   beta1 ~ normal( 0 , 1e+06 );
   beta0 ~ normal( 0 , 1e+06 );
   for( i in 1:N_uncensored ) {
-    t_uncensored[i] ~ weibull(1, exp( -(beta0 + beta1 * trt_uncensored[i])) );
+    t_uncensored[i] ~ exponential( 1 / exp( -(beta0 + beta1 * trt_uncensored[i])) );
+    // t_uncensored[i] ~ weibull(1, exp( -(beta0 + beta1 * trt_uncensored[i])) );
     // t_uncensored[i] ~ weibull(r, exp(-beta[trt_uncensored[i]] / r ));
   }
   for( i in 1:N_censored ){

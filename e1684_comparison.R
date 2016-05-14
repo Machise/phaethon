@@ -5,34 +5,14 @@ library(rstan)
 library(rethinking)
 source("e1684_data.R")
 
-lfe$t
-lfe$t.cen
 
-event = ifelse(is.na(lfe$t), 0, 1)
-obs_t = ifelse(is.na(lfe$t), lfe$t.cen, lfe$t)
-
-Surv(obs_t, event)
-
-dfe = data.frame(obs_t, event, trt = lfe$trt)
-# 
-# m5 = map2stan(
-#   alist(
-#     beta0 ~ dnorm(0, 1e5),
-#     beta1 ~ dnorm(0, 1e5),
-#     
-#     obs_t ~ dexp(lambda),
-#     lambda <- exp(beta0 + beta1 * trt)
-#   ), data = dfe, start = list(beta0 = 0, beta1 = 0)
-# )
-# precis(m5)
-# stancode(m5)
-
-
-m1 = survreg(Surv(obs_t, event) ~ trt, data = lfe, dist = "exponential")
+# Litmus Test
+### Survival Package Fit
+m1 = survreg(Surv(obs_t, event) ~ trt, data = dfe, dist = "exponential")
 summary(m1)
 
-lfe$isCensored = ifelse(is.na(lfe$t), 1, 0)
 
+## JAGS Model
 cat("
     model
     {
@@ -57,23 +37,14 @@ print(m2)[,"Mean"]
 
 
 
-# Data needs to be reprocessed to separate censored data from non-censored data
-censored = is.na(lfe$t)
-
-lfs = list(
-    N_uncensored = sum(!censored),
-     N_censored   = sum(censored),
-     N = sum(!censored) + sum(censored),
-     t_uncensored = lfe$t[!censored],
-     t_censored   = lfe$t.cen[censored],
-     trt_uncensored = lfe$trt[!censored],
-     trt_censored = lfe$trt[censored]
-)
 
 
 
 
 
 m3 = stan(file = "e1684_STAN.stan", data=lfs, iter = 1e4, warmup = 1e3); precis(m3)
-pairs(m3)
+# pairs(m3)
+print(m3)
 #m3 = stan(file = "mice.stan", data=lfs)
+
+m4 = stan(file = "e1684_STAN_weibull.stan", data = lfs, iter = 1e4, warmup = 1e3); precis(m4)
