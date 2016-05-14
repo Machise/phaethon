@@ -117,31 +117,36 @@ print(m3f)
 
 
 #### Attempt 4 ####
-# Linear Model with Count Function
+# Linear Model with Count Function and Boolean Fatal Alarm
 
 N = 1000
-w_shape = 1   
+w_shape = 6
 # replace with Linear Model exp(- (beta_0 + beta_1 x_1 + ...) )
-beta0 = 300 # Global Intercept
+beta0 = 300 # Average Number of Days until Failure
 beta1 = -10  # Average Number of Days Decrease per Alarm Count
 x1 = rpois(N, 10) # Set the average number of alarms
+beta2 = -100  # Average Number of Days Decrease per Fatal Alarm
+x2 = rbinom(N, 1, 0.05) # Fatal Alarm (Boolean)
+
 
 
 
 # t_avgfail = rnorm(N, 300, 1.5)
-w_scale  = beta0 + beta1 * x1
+w_scale  = beta0 + beta1 * x1 + beta2 * x2
 
 t_obs = rweibull(N, shape = w_shape, scale = exp(-w_scale))
+## Make sure this is greater than 0 for all values, call error otherwise
 
 nl_t_obs = -log(t_obs)
 
-lfe = list(N = N, t_obs = t_obs, x1 = x1)
+lfe = list(N = N, t_obs = t_obs, x1 = x1, x2 = x2)
 
 m4 = "
 data {
 int<lower=0>  N;
 real<lower=0> t_obs[N];
 int x1[N];
+int x2[N];
 }
 
 parameters {
@@ -149,21 +154,22 @@ real<lower=0> shape;
 //real<lower=0> scale;
 real beta0;
 real beta1;
-
+real beta2;
 }
 
 model {
 shape ~ cauchy(0,2);
 beta0 ~ cauchy(0,2);
 beta1 ~ cauchy(0,2);
+beta2 ~ cauchy(0,2);
 for(i in 1:N){
-t_obs[i] ~ weibull(shape, exp( -(beta0 + beta1 * x1[i])));
+t_obs[i] ~ weibull(shape, exp( -(beta0 + beta1 * x1[i] + beta2 * x2[i] )));
 }
 
 }
 "
 
-m4f = stan(model_code = m4, data = lfe, cores = 3, chains = 2, iter = 1e4, warmup = 1e3, control=list(adapt_delta=0.99))
+m4f = stan(model_code = m4, data = lfe, cores = 7, chains = 2, iter = 1e4, warmup = 1e3, control=list(adapt_delta=0.99))
 print(m4f)
 
 
