@@ -4,8 +4,9 @@ library(rstan)
 N = 100
 shape = 1   
 scale = 300 # replace with Linear Model exp(- (beta_0 + beta_1 x_1 + ...) )
+scale = 0.002 # replace with Linear Model exp(- (beta_0 + beta_1 x_1 + ...) )
 
-t_obs = rweibull(N, shape = shape, scale = scale)
+t_obs = rweibull(N, shape = shape, scale = exp(-scale))
 
 lfe = list(N = N, t_obs = l_obs)
 
@@ -23,12 +24,12 @@ real<lower=0> scale;
 model {
 shape ~ cauchy(0,2);
 scale ~ cauchy(0,2);
-t_obs ~ weibull(shape, scale);
+t_obs ~ weibull(shape, exp(-scale));
 }
 "
 
-m1f = stan(model_code = sm1, data = lfe, cores = 3, chains = 2, iter = 1e4, warmup = 1e3)
-
+m1f = stan(model_code = m1, data = lfe, cores = 3, chains = 2, iter = 1e4, warmup = 1e3)
+print(m1f)
 
 #### Attempt 2 ####
 # Adding noise
@@ -139,8 +140,7 @@ w_scale  = exp( -(beta0 + beta1 * x1 + beta2 * x2) )
 
 t_obs = rweibull(N, shape = w_shape, scale = w_scale)
 ## Make sure this is greater than 0 for all values, call error otherwise
-
-# nl_t_obs = -log(t_obs)
+nl_t_obs = -log(t_obs)
 
 lfe = list(N = N, t_obs = t_obs, x1 = x1, x2 = x2)
 
@@ -154,7 +154,6 @@ int x2[N];
 
 parameters {
 real<lower=0> shape;
-//real<lower=0> scale;
 real beta0;
 real beta1;
 real beta2;

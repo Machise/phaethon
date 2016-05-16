@@ -13,6 +13,7 @@ summary(m1)
 
 
 
+
 ## JAGS Model
 cat("
     model
