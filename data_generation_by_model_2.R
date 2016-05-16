@@ -182,7 +182,7 @@ plot(density(-log(t_obs)))
 
 
 #### Attempt 5 ####
-# Linear Model with Integrated Log
+# With baseline hazard
 
 N = 1000
 w_shape = 6
@@ -190,20 +190,23 @@ w_shape = 6
 beta0 = 300 # Average Number of Days until Failure
 beta1 = -10  # Average Number of Days Decrease per Alarm Count
 x1 = rpois(N, 10) # Set the average number of alarms
+beta2 = -100  # Average Number of Days Decrease per Fatal Alarm
+x2 = rbinom(N, 1, 0.05) # Fatal Alarm (Boolean)
 
 
 
 
 # t_avgfail = rnorm(N, 300, 1.5)
-w_scale  = beta0 + beta1 * log(x1)
-w_scale  = beta0 + beta1 * x1
+# w_scale  = beta0 + beta1 * x1 + beta2 * x2
+w_scale  = beta0 + beta1 * x1 + beta2 * x2
+bl_haz = 0.002
 
-t_obs = rweibull(N, shape = w_shape, scale = exp(-w_scale))
+t_obs = rweibull(N, shape = w_shape, scale = bl_haz * exp(-w_scale))
 ## Make sure this is greater than 0 for all values, call error otherwise
 
-# nl_t_obs = log(t_obs)
+# nl_t_obs = -log(t_obs)
 
-lfe = list(N = N, t_obs = t_obs, x1 = x1 )
+lfe = list(N = N, t_obs = t_obs, x1 = x1, x2 = x2)
 
 m5 = "
 data {
@@ -228,17 +231,16 @@ beta0 ~ cauchy(0,2);
 beta1 ~ cauchy(0,2);
 beta2 ~ cauchy(0,2);
 for(i in 1:N){
-scale[i] <- exp( -(beta0 + beta1 * x1[i] ));
+scale[i] <- exp( -(beta0 + beta1 * x1[i] + beta2 * x2[i] ));
 }
 t_obs ~ weibull(shape, scale);
 }
 "
 
-m5f = stan(model_code = m5, data = lfe, 
-           cores = 7, chains = 2, iter = 1e4, warmup = 1e3, control=list(adapt_delta=0.99))
+m5f = stan(model_code = m5, data = lfe, cores = 7, chains = 2, iter = 1e4, warmup = 1e3, control=list(adapt_delta=0.99))
 print(m5f)
 
 
-# plot(density(-log(t_obs)))
+plot(density(-log(t_obs)))
 
 
