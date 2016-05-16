@@ -1,5 +1,5 @@
 ## Data Generation By Model
-
+library(rstan)
 
 N = 100
 shape = 1   
@@ -61,7 +61,10 @@ t_obs ~ weibull(shape, scale);
 }
 "
 
-m2f = stan(model_code = m2, data = lfe, cores = 3, chains = 2, iter = 1e5, warmup = 1e3, control=list(adapt_delta=0.99))
+m2f = stan(model_code = m2, data = lfe, 
+           verbose = TRUE,
+           cores = 3, chains = 2, iter = 1e5, warmup = 1e3, 
+           control=list(adapt_delta=0.99))
 print(m2f)
 
 
@@ -137,7 +140,7 @@ w_scale  = beta0 + beta1 * x1 + beta2 * x2
 t_obs = rweibull(N, shape = w_shape, scale = exp(-w_scale))
 ## Make sure this is greater than 0 for all values, call error otherwise
 
-nl_t_obs = -log(t_obs)
+# nl_t_obs = -log(t_obs)
 
 lfe = list(N = N, t_obs = t_obs, x1 = x1, x2 = x2)
 
@@ -158,14 +161,15 @@ real beta2;
 }
 
 model {
+vector[N] scale;
 shape ~ cauchy(0,2);
 beta0 ~ cauchy(0,2);
 beta1 ~ cauchy(0,2);
 beta2 ~ cauchy(0,2);
 for(i in 1:N){
-t_obs[i] ~ weibull(shape, exp( -(beta0 + beta1 * x1[i] + beta2 * x2[i] )));
+  scale[i] <- exp( -(beta0 + beta1 * x1[i] + beta2 * x2[i] ));
 }
-
+t_obs ~ weibull(shape, scale);
 }
 "
 
@@ -174,3 +178,67 @@ print(m4f)
 
 
 plot(density(-log(t_obs)))
+
+
+
+#### Attempt 5 ####
+# Linear Model with Integrated Log
+
+N = 1000
+w_shape = 6
+# replace with Linear Model exp(- (beta_0 + beta_1 x_1 + ...) )
+beta0 = 300 # Average Number of Days until Failure
+beta1 = -10  # Average Number of Days Decrease per Alarm Count
+x1 = rpois(N, 10) # Set the average number of alarms
+
+
+
+
+# t_avgfail = rnorm(N, 300, 1.5)
+w_scale  = beta0 + beta1 * log(x1)
+w_scale  = beta0 + beta1 * x1
+
+t_obs = rweibull(N, shape = w_shape, scale = exp(-w_scale))
+## Make sure this is greater than 0 for all values, call error otherwise
+
+# nl_t_obs = log(t_obs)
+
+lfe = list(N = N, t_obs = t_obs, x1 = x1 )
+
+m5 = "
+data {
+int<lower=0>  N;
+real<lower=0> t_obs[N];
+int x1[N];
+int x2[N];
+}
+
+parameters {
+real<lower=0> shape;
+//real<lower=0> scale;
+real beta0;
+real beta1;
+real beta2;
+}
+
+model {
+vector[N] scale;
+shape ~ cauchy(0,2);
+beta0 ~ cauchy(0,2);
+beta1 ~ cauchy(0,2);
+beta2 ~ cauchy(0,2);
+for(i in 1:N){
+scale[i] <- exp( -(beta0 + beta1 * x1[i] ));
+}
+t_obs ~ weibull(shape, scale);
+}
+"
+
+m5f = stan(model_code = m5, data = lfe, 
+           cores = 7, chains = 2, iter = 1e4, warmup = 1e3, control=list(adapt_delta=0.99))
+print(m5f)
+
+
+# plot(density(-log(t_obs)))
+
+
