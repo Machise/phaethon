@@ -127,16 +127,16 @@ N = 1000
 w_shape = 6
 # replace with Linear Model exp(- (beta_0 + beta_1 x_1 + ...) )
 beta0 = 300 # Average Number of Days until Failure
-beta1 = -10  # Average Number of Days Decrease per Alarm Count
+beta1 = 0.9  # Average Number of Days Decrease per Alarm Count
 x1 = rpois(N, 10) # Set the average number of alarms
-beta2 = -100  # Average Number of Days Decrease per Fatal Alarm
+beta2 = 0.5  # Average Number of Days Decrease per Fatal Alarm
 x2 = rbinom(N, 1, 0.05) # Fatal Alarm (Boolean)
 
 
 
 
 # t_avgfail = rnorm(N, 300, 1.5)
-w_scale  = exp( -(beta0 + beta1 * x1 + beta2 * x2) )
+w_scale  = exp( -(beta1 * x1 + beta2 * x2) )
 
 t_obs = rweibull(N, shape = w_shape, scale = w_scale)
 ## Make sure this is greater than 0 for all values, call error otherwise
