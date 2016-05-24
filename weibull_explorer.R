@@ -57,7 +57,7 @@ lines(t_obs, h30, type ="l", col = "magenta")
 
 shape = 6
 scale = 300
-y = 1:5
+y = 1:450
 loc = 0
 f_x = (shape / scale) * ((y - loc) / scale)^(shape - 1) * exp(-( (y - loc) /scale)^shape)
 # dweibull(y, shape, scale)
