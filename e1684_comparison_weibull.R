@@ -26,8 +26,9 @@ cat("
     # Likelihood
     for(i in 1:N) {
       isCensored[i] ~ dinterval(t[i], t.cen[i])
-      t[i] ~ dweibull(alpha,lambda[i])
-      lambda[i] <- exp(beta0 + beta1 * trt[i])
+      t[i] ~ dweibull(alpha,mu[i])
+      mu[i] <- exp(beta0 + beta1 * trt[i])
+      lambda[i] <- log(mu[i])
       }
     # Mean time to death
       

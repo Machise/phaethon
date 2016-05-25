@@ -22,8 +22,9 @@ model{
   for ( i in 1:N ) {
     lambda[i] <- baseline * exp( -(beta2 * x2[i]) );
   }
-  t ~ weibull(shape, lambda );
+  increment_log_prob(weibull_log(t, shape, lambda));
+  //t ~ weibull(shape, lambda );
 }
 generated quantities {
-    
+    // weibull_rng
 }

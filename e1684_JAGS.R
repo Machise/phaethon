@@ -12,7 +12,7 @@ model
   {
     for(i in 1:N)
       {
-        //isCensored[i] ~ dinterval(t[i], t.cen[i])
+        isCensored[i] ~ dinterval(t[i], t.cen[i])
         t[i] ~ dweibull(1,lambda[i])
         lambda[i] <- exp(beta0 + beta1 * trt[i])
       }  

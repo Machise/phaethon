@@ -6,6 +6,7 @@ beta2 = 1
 
 bl_haz = 365
 t_1 = bl_haz * rweibull(1e3, shape = 6, scale = exp(  -( (beta2 * x2) )  ) )
+t_1 = bl_haz * rweibull(1e3, shape = 12, scale = exp(  -( (0.105) )  ) )
 
 plot(density(t_1))
 
