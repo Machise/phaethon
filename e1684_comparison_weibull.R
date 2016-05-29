@@ -56,3 +56,6 @@ summary(m2)
 summary(m1)
 
 m4 = stan(file = "e1684_STAN_weibull.stan", data = lfs, iter = 1e4, warmup = 1e3); precis(m4)
+print(m4)
+m4samp = m4@sim$samples
+
