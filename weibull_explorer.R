@@ -76,3 +76,10 @@ H_x = (y/scale)^(shape)
 # Time to Failure
 mean_ttf = loc + scale * gamma( (1 / shape) + 1 ) 
 median_ttf = loc + scale * (log(2))^(1/shape)
+
+
+haz = function(t, shape, scale, dist = "Weibull"){
+  (shape/scale) * (t / scale)^(shape - 1)
+}
+
+plot(1:900, haz(1:900, 0.5, scale), type="l")
