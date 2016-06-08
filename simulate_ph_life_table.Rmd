@@ -31,6 +31,27 @@ dfu$width <- dfu$age.upper - dfu$age.lower + 1
 ```
 
 ```{r}
+cdf = 1 - dfu$lx/df$lx[1]
+plot(dfu$age.lower, cdf , type = "s")
+```
+
+
+
+```{r}
+u = runif(n=1)
+u = 0.654
+
+lifetime = df$age.lower[sum(cdf < u) + 1]
+
+plot(dfu$age.lower, cdf , type = "s")
+arrows(x0 = 0, x1 = lifetime, y1 = u, y0 = u, col='blue', lwd=3 )
+arrows(x0 = lifetime, x1 = lifetime, y1 = 0, y0 = u, col='blue', lwd=3 )
+```
+
+
+```{r}
+N = 1e6
+
 
 ```
 
