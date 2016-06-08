@@ -26,8 +26,9 @@ cat("
     # Likelihood
     for(i in 1:N) {
       isCensored[i] ~ dinterval(t[i], t.cen[i])
-      t[i] ~ dweibull(alpha,lambda[i])
-      lambda[i] <- exp(beta0 + beta1 * trt[i])
+      t[i] ~ dweibull(alpha,mu[i])
+      mu[i] <- exp(beta0 + beta1 * trt[i])
+      lambda[i] <- log(mu[i])
       }
     # Mean time to death
       
@@ -55,3 +56,6 @@ summary(m2)
 summary(m1)
 
 m4 = stan(file = "e1684_STAN_weibull.stan", data = lfs, iter = 1e4, warmup = 1e3); precis(m4)
+print(m4)
+m4samp = m4@sim$samples
+

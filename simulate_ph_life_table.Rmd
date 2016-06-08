@@ -1,0 +1,57 @@
+---
+title: "Simulating data with PH assumptions starting with a life table"
+output: html_notebook
+---
+
+
+[Demography 213 - Simulating Data with Proportional Hazards Assumption Starting with a Life Table](http://courses.demog.berkeley.edu/mason213F15/Week10/welcome.pdf)
+
+We first begin by reading in the data. 
+
+```{r}
+df = read.table("Data/bltper_5x1.txt", skip = 2, header = TRUE, stringsAsFactors = FALSE)
+```
+
+We can then print out the top few rows to make sure that it was inputted correctly:
+
+```{r}
+head(df)
+```
+
+**lx** is defined as survivorship. 
+
+
+
+```{r}
+source("snorkHMD.r")
+df = cleanHMD(df)
+
+dfu = df[df$Year == "2005",]
+dfu$width <- dfu$age.upper - dfu$age.lower + 1
+```
+
+```{r}
+cdf = 1 - dfu$lx/df$lx[1]
+plot(dfu$age.lower, cdf , type = "s")
+```
+
+
+
+```{r}
+u = runif(n=1)
+u = 0.654
+
+lifetime = df$age.lower[sum(cdf < u) + 1]
+
+plot(dfu$age.lower, cdf , type = "s")
+arrows(x0 = 0, x1 = lifetime, y1 = u, y0 = u, col='blue', lwd=3 )
+arrows(x0 = lifetime, x1 = lifetime, y1 = 0, y0 = u, col='blue', lwd=3 )
+```
+
+
+```{r}
+N = 1e6
+
+
+```
+

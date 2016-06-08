@@ -20,11 +20,9 @@ model{
   for( i in 1:N_uncensored ) {
     // t_uncensored[i] ~ exponential( 1 / exp( -(beta0 + beta1 * trt_uncensored[i])) );
     t_uncensored[i] ~ weibull(alpha, exp( -(beta0 + beta1 * trt_uncensored[i])) );
-    // t_uncensored[i] ~ weibull(r, exp(-beta[trt_uncensored[i]] / r ));
   }
   for( i in 1:N_censored ){
     // increment_log_prob(weibull_ccdf_log(t_censored[i], 1, exp( -(beta0 + beta1 * trt_censored[i] )) / t_censored[i]));
     t2_censored[i] ~ weibull(alpha, exp( -(beta0 + beta1 * trt_censored[i] )) / t_censored[i]);
-    // t2_censored[i] ~ weibull(r, exp(-beta[trt_censored[i]] / r) / t_censored[i]);
   }
 }

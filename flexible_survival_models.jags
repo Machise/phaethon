@@ -1,0 +1,38 @@
+data{
+  for (i in 1:N){
+    ones[i] <- 1
+  }     
+}
+
+model{
+  for (i in 1:N) {
+    
+    q[i]<-L[i]/C 
+    ones[i]~dbern(q[i])
+    # Likelihood for survival data 
+    # event=1 if event, and 0 if censoring
+    L[i]<-pow(h[i],event[i])*S[i] 
+    
+    # Hazard for individual i at their survival time
+    # This is where we specify it as U-shaped (quadratic)
+    h[i] <- alpha*T[i] + beta*(T[i]^2)
+    
+    # Cumulative hazard H[t] = int_0^t (h[u] du)
+    H[i] <- (alpha)*(1/2)*(T[i]^2) + (beta)*(1/3)*(T[i]^3)
+    
+    # Survival probability for individual i 
+    # at their survival time
+    S[i]<-exp(-H[i])
+    
+    # Density function
+    f[i]<-h[i]*S[i]
+    
+  }  
+  
+  C<- 10000000 # part of trick
+  
+  #priors
+  #Parameters of interest
+  alpha~dnorm(0,1.0E-6)
+  beta~dnorm(0,1.0E-6)
+}
