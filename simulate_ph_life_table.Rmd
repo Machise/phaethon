@@ -20,12 +20,17 @@ head(df)
 
 **lx** is defined as survivorship. 
 
-As we are using a life table to generate 
 
-Import functions to generate lower and upper age on 
 
 ```{r}
 source("snorkHMD.r")
 df = cleanHMD(df)
+
+dfu = df[df$Year == "2005",]
+dfu$width <- dfu$age.upper - dfu$age.lower + 1
+```
+
+```{r}
+
 ```
 
