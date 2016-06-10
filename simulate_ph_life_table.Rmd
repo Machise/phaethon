@@ -31,7 +31,7 @@ dfu$width <- dfu$age.upper - dfu$age.lower + 1
 ```
 
 ```{r}
-cdf = 1 - dfu$lx/df$lx[1]
+cdf = 1 - dfu$lx/dfu$lx[1]
 plot(dfu$age.lower, cdf , type = "s")
 ```
 
@@ -50,8 +50,218 @@ arrows(x0 = lifetime, x1 = lifetime, y1 = 0, y0 = u, col='blue', lwd=3 )
 
 
 ```{r}
-N = 1e6
-
-
+N = 1e5
+lf = runif(n=N) # Generates probabilities btwn 0 and 1
+head(lf) 
 ```
+
+<!-- A brief intermission into how `cut()` works.  -->
+<!-- ```{r} -->
+<!-- Z <- stats::rnorm(10000) -->
+<!-- table(cut(Z, breaks = -6:6)) -->
+<!-- sum(table(cut(Z, breaks = -6:6, labels = FALSE))) -->
+<!-- ``` -->
+
+
+
+```{r}
+lives = cut(lf, breaks=c(cdf, 1), labels = dfu$age.lower)
+head(lives)
+```
+
+
+```{r}
+cbind(table(lives), dfu$dx)
+```
+
+
+
+```{r}
+lx_hat = c(N,N - cumsum(table(lives)))
+lx_hat = lx_hat[-length(lx_hat)]
+names(lx_hat) = dfu$age.lower
+
+lx_hat
+```
+
+
+
+```{r}
+plot( lx_hat ~ names(lx_hat), type = "s", lwd = 4, 
+      col = rgb(red = 0, green = 0, blue = 1, alpha = 0.5)  )
+lines(dfu$age.lower, dfu$lx, type = "s", lty = 2, lwd = 2, col = "red")
+title("Lifetime table and simulated lifetime")
+legend(x = "bottomleft", lty = 2:1, lwd = 2:1, col = c("red", "blue"),
+       legend = c("lx US-05", "simulated"), bty = "n")
+```
+
+
+
+```{r}
+plot(dfu$age.lower, cdf, type = "s", lty = 2)
+lines(x = dfu$age.lower, y = cdf, type = 'b', lty = 1, lwd = 2, col = 'violet', cex = 0.5)
+```
+
+
+```{r}
+cdf = 1 - dfu$lx/dfu$lx[1]
+
+lf = runif(n = 10000)
+lives_linear = approx(y = dfu$age.lower, x = cdf, xout = lf )
+
+lives = cut(lf, breaks = c(cdf, 1), labels = dfu$age.lower )
+plot(
+  y = sort(as.numeric(as.character(lives))),
+  x = (1:length(lives)) / length(lives),
+  xlab = "percentile", cex = 0.3)
+points(
+  y = sort(lives_linear$y), pch = 2, cex=0.3, col= "red",
+  x = (1:length(sort(lives_linear$y))) / length(lives_linear$y)
+)
+```
+
+
+
+```{r}
+lambda = 0.05
+ranexp = -log(runif(n=10000)) / lambda
+mean(ranexp)
+1 / lambda
+```
+
+```{r}
+plot(sort(ranexp, decreasing = TRUE))
+lines(sort(rexp(n=10000, rate = lambda), decreasing = TRUE), col = 'red', lwd = 3)
+```
+
+```{r}
+qqplot(ranexp, rexp(n = 10000, rate = lambda))
+```
+
+
+```{r}
+rise = diff(log(dfu$lx))
+run = diff(dfu$age.lower)
+hazard = -rise / run
+dotchart(hazard, labels = dfu$Age, main = "Hazard Rate by age category")
+```
+
+
+Note the constant hazard rate
+
+```{r}
+S_t = function(t, lambda){
+  exp(-lambda * t)
+}
+
+plot(1:200, S_t(1:200, 0.0070548269), type = "l")
+```
+
+
+
+```{r}
+lxCinverse = function(u, life_tab=dfu){
+  survival = c(with(life_tab, lx / lx[1]), 0)
+  survival.age = c(life_tab$age.lower, 110)
+  
+  res = approx(
+    y = survival.age,
+    x = log(survival + 0.000001),
+    xout = log(u)
+  )
+  return(res$y)
+}
+
+with(dfu, plot(age.lower ~ I(lx / lx[1]), type = "s"))
+curve(lxCinverse, from = 0, to = 1, n = 10000, lwd = 2, add = TRUE, col = "purple")
+```
+
+
+```{r}
+summary(lives_linear$y)
+summary(lxCinverse(runif(10000), dfu))
+```
+
+
+```{r}
+lives_0 = lxCinverse(u = runif(n = 10000), life_tab = dfu)
+dfv = dfu
+dfv$lx = dfv$lx^(exp(-0.25))
+
+lives_1 = lxCinverse(u = runif(n = 10000), life_tab = dfv)
+
+dset = data.frame(
+                lives = c(lives_0, lives_1), 
+                veg = c( rep(0, length(lives_0)), rep(1, length(lives_1) ) )
+                )
+```
+
+
+```{r}
+library(survival)
+
+dset$depvar = Surv(
+  time  = rep(0, nrow(dset)),
+  time2 = dset$lives,
+  event = rep(1, nrow(dset))
+)
+
+cox_res = coxph(depvar ~ veg, data = dset)
+summary(cox_res)
+```
+
+
+
+```{r}
+survival = c((dfu$lx / dfu$lx[1]),0)
+survival_age = c(dfu$age.lower, 124)
+survival_veg = survival^exp(-0.25)
+
+lives_0 = approx(y = survival_age,
+                 x = survival,
+                 xout = runif(n=10000))$y
+
+lives_1 = approx(y = survival_age,
+                 x = survival_veg,
+                 xout = runif(n=10000))$y
+
+dset = data.frame(
+                lives = c(lives_0, lives_1), 
+                veg = c( rep(0, length(lives_0)), rep(1, length(lives_1) ) )
+                )
+
+dset$depvar = Surv(
+  time  = rep(0, nrow(dset)),
+  time2 = dset$lives,
+  event = rep(1, nrow(dset))
+)
+
+cox_res = coxph(depvar ~ veg, data = dset)
+summary(cox_res)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
