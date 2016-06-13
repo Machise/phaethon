@@ -118,6 +118,7 @@ points(
   y = sort(lives_linear$y), pch = 2, cex=0.3, col= "red",
   x = (1:length(sort(lives_linear$y))) / length(lives_linear$y)
 )
+title("Discrete vs piecewise linear lifetimes")
 ```
 
 
