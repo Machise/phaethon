@@ -82,4 +82,59 @@ haz = function(t, shape, scale, dist = "Weibull"){
   (shape/scale) * (t / scale)^(shape - 1)
 }
 
-plot(1:900, haz(1:900, 0.5, scale), type="l")
+h_t = function(lifetime, nu, lambda){
+  lambda * nu * lifetime^(nu - 1)
+}
+
+
+plot(1:900, haz(1:900, 1.5, scale), type="l")
+
+
+
+
+
+haz2 = function(t, v, lambda){
+  lambda * v * t^(v-1)
+}
+
+
+ts = seq(1, 10, by= 0.01)
+plot(ts, seq(-50, 400, length.out=length(ts)), type="n")
+vs = seq(-3, 3, 0.5)
+for(i in vs){
+  lines(ts, haz2(ts, 0.5, i))
+}
+
+
+lines(ts, haz2(ts, 3, 2), type="l")
+lines(ts, haz2(ts, 1, 2), lty=2)
+lines(ts, haz2(ts, 2, 2), lty=2)
+lines(ts, haz2(ts, 2.5, 2), lty=2)
+
+
+###### Alternative Parameterization
+ts = seq(0, 2, by= 0.01)
+nu = 1.5
+lambda = 5
+
+
+dweibull2 = function(x, nu, lambda) {
+  lambda * nu * x^(nu-1) * exp(-lambda * x^nu )
+}
+
+f05 = dweibull2(ts, 0.5, 5)
+f15 = dweibull2(ts, 1.5, 5)
+f30 = dweibull2(ts, 3.0, 5)
+
+
+plot(ts, f30, type = "n")
+lines(ts, f05, type ="l", col = "red")
+lines(ts, f15, type ="l", col = "blue")
+lines(ts, f30, type ="l", col = "magenta")
+
+
+f05 = h_t(ts, 0.5,5)
+f15 = h_t(ts, 1.5,5)
+f30 = h_t(ts, 3.0,5)
+
+plot(ts, f30, type = "n")
