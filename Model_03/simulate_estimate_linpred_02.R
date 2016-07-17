@@ -55,6 +55,8 @@ names(lin_preds) = NULL
 real_times = Surv_Times(H_inv_t, N, nu = nu, lambda = lambda, lin_pred = lin_preds)
 # Add Noise
 # real_times = rowSums(cbind(real_times, abs(rnorm(N,0, 0.001))))
+noise_level = 0.1
+real_times[1:(N*noise_level)] = runif(N * noise_level, min = min(real_times), max = max(real_times))
 
 plot(density(real_times))
 cens_times = runif(N, min = 0, max = max(real_times))
