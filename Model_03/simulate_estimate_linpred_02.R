@@ -16,7 +16,7 @@ Surv_Times = function(H_inv_t, N, ...){
 
 
 # N = 500
-N = 5000
+N = 500
 nu = 1.5
 lambda = 3
 
@@ -33,7 +33,7 @@ type_size =
     40 ,  0, 10,
     0  , 30, 20)
 
-type_size = type_size * 10
+type_size = type_size * (N / sum(type_size))
 
 inv_type = character()
 for(i in seq_along(type_size)){
@@ -86,16 +86,17 @@ lin_preds = mean(samps$beta_cen) * inv_type[,1] + mean(samps$beta_str) * inv_typ
 df = data.frame(h_t = h_t(min_times, mean(samps$nu), mean(samps$lambda), lin_pred = lin_preds),
                 H_t = H_t(min_times, mean(samps$nu), mean(samps$lambda), lin_pred = lin_preds),
                 real_times = real_times,
-                min_times = min_times,
+                obs_times = min_times,
                 diff_times = real_times - min_times,
                 inv_label = inv_label,
                 mres = (min_times^mean(samps$nu) + log(2) * lin_preds)^(1/mean(samps$nu)),
                 d_i = d_i)
 
 
-df = df[df$d_i == 0,]
+# df = df[df$d_i == 0,]
 
-ggplot(df, aes(x = min_times, y = h_t, color = inv_label)) + geom_point()
+ggplot(df, aes(x = obs_times, y = h_t, color = inv_label)) + geom_point()
+ggplot(df, aes(x = obs_times, y = H_t, color = inv_label)) + geom_point()
 
 
 ggplot(df, aes(x = diff_times, y = h_t, color = inv_label)) + geom_point()

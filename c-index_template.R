@@ -1,6 +1,6 @@
 
 
-
+## If you have event and non-event
 eve = c(80,20,50,30)
 non = c(30,20,50)
 
@@ -26,3 +26,4 @@ c_index = function(event, non_event){
 }
 
 c_index(eve, non)
+
