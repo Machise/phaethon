@@ -17,9 +17,9 @@ Surv_Times = function(H_inv_t, N, ...){
 
 N = 500
 nu = 3
-lambda = 5
+lambda = 10
 
-beta = 0.75
+beta = 1
 
 x_1 = c(rep(1, N/2), rep(0, N/2))
 lin_pred = beta*x_1
