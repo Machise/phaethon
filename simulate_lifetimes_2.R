@@ -213,36 +213,37 @@ m3f = stan(model_code = m3, data = stan_data, cores = 3, chains = 2, iter = 1e4,
 print(m3f)
 
 
+# Now with more variables
 
 library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
 
-# Now with more variables
 
 N = 500
 
 # Model 1
 alp = 1.5
-sig = 3
+sig = 365
 
 # Model 2
 nu = alp
 lambda = sig^(-alp)
 
-# id	park	type	kWh_l30d	weather_l30d	err_code01_l30d	err_code02_l30d	repair_days
-beta_1      = 0.3
-beta_2      = 3
-beta_repair = -0.1
+# id	park	type	kWh_l30d	weather_l30d		err_code02_l30d	
+beta_1      = 0.3 # err_code01_l30d
+beta_2      = 3  # err_code02_l30d - Severe
+beta_repair = -0.15 # repair_days
 
-x_1      = rpois(N, 6)
-x_2      = rbinom(N, 1, 0.5)
-x_repair = rpois(N, 20)
+x_1      = rpois(N, 5) # err_code01_l30d
+x_2      = rbinom(N, 1, 0.5) # err_code02_l30d - Severe
+x_repair = rpois(N, 20) # repair_days
 
 lin_pred = x_1 * beta_1 + x_2 * beta_2 + x_repair * beta_repair
 # Data Generation
 lifetimes = ((sig^alp) * (-log(runif(N))* exp(-lin_pred)) )^(1/alp)
+lifetimes = ((sig^alp) * (-log(runif(N))* exp(-(x_repair * beta_repair))) )^(1/alp)
 d_i = rep(1, N)
 
 stan_data = list(
